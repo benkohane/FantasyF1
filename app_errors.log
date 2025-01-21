@@ -1,0 +1,30 @@
+ERROR:root:Error fetching race results for round 21: list index out of range
+ERROR:root:Error fetching race results for round 22: list index out of range
+ERROR:root:Error fetching race results for round 23: list index out of range
+ERROR:root:Error fetching race results for round 24: list index out of range
+INFO:werkzeug:[31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5000
+INFO:werkzeug:[33mPress CTRL+C to quit[0m
+INFO:werkzeug: * Restarting with stat
+ERROR:root:Error fetching race results for round 21: list index out of range
+ERROR:root:Error fetching race results for round 22: list index out of range
+ERROR:root:Error fetching race results for round 23: list index out of range
+ERROR:root:Error fetching race results for round 24: list index out of range
+WARNING:werkzeug: * Debugger is active!
+INFO:werkzeug: * Debugger PIN: 369-944-646
+ERROR:root:Error fetching race results for round 21: list index out of range
+ERROR:root:Error fetching race results for round 21: list index out of range
+ERROR:root:Error fetching race results for round 22: list index out of range
+ERROR:root:Error fetching race results for round 22: list index out of range
+ERROR:root:Error fetching race results for round 23: list index out of range
+ERROR:root:Error fetching race results for round 23: list index out of range
+ERROR:root:Error fetching race results for round 24: list index out of range
+INFO:werkzeug:127.0.0.1 - - [16/Jan/2025 00:55:25] "GET / HTTP/1.1" 200 -
+ERROR:root:Error fetching race results for round 24: list index out of range
+INFO:werkzeug:127.0.0.1 - - [16/Jan/2025 00:55:25] "GET / HTTP/1.1" 200 -
+ERROR:root:Error fetching race results for round 21: list index out of range
+ERROR:root:Error fetching race results for round 22: list index out of range
+ERROR:root:Error fetching race results for round 23: list index out of range
+ERROR:root:Error fetching race results for round 24: list index out of range
+INFO:werkzeug:127.0.0.1 - - [16/Jan/2025 00:55:27] "GET / HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [16/Jan/2025 00:55:27] "[33mGET /static/styles.css HTTP/1.1[0m" 404 -

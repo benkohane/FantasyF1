@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block title %}Select Driver{% endblock %}
+
+{% block content %}
+<h2>Select Driver for {{ race_title }} (Round {{ race_round }})</h2>
+
+<form method="POST">
+    <label for="driver">Choose a Driver:</label>
+    <select name="driver" id="driver" required>
+        {% for driver in drivers %}
+            <option value="{{ driver.code }}" {% if driver.selection_count >= 2 %}disabled style="color: gray;" title="You can only select each driver twice per season"{% endif %}>
+                {{ driver.name }} {% if driver.selection_count >= 2 %}(Maxed Out){% endif %}
+            </option>
+        {% endfor %}
+    </select>
+    <br><br>
+    <button type="submit">Submit</button>
+</form>
+
+<h3>Driver Selection Status</h3>
+<ul>
+    {% for driver in drivers %}
+        <li>{{ driver.name }}: {{ driver.selection_count }} selections</li>
+    {% endfor %}
+</ul>
+{% endblock %}

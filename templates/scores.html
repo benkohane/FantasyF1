@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block title %}Scores{% endblock %}
+
+{% block content %}
+<h2>Scores</h2>
+<table border="1">
+    <thead>
+        <tr>
+            <th>Username</th>
+            <th>Race Round</th>
+            <th>Selected Driver</th>
+            <th>Points</th>
+            <th>Total Points</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for username, data in user_data.items() %}
+            {% for selection in data.selections %}
+                <tr>
+                    {% if loop.first %}
+                        <td rowspan="{{ data.selections|length }}">{{ username }}</td>
+                    {% endif %}
+                    <td>{{ selection.race_round }}</td>
+                    <td>{{ selection.selected_driver }}</td>
+                    <td>{{ selection.points if selection.points is not none else 'N/A' }}</td>
+                    {% if loop.first %}
+                        <td rowspan="{{ data.selections|length }}">{{ data.total_points }}</td>
+                    {% endif %}
+                </tr>
+            {% endfor %}
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

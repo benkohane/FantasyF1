@@ -1,0 +1,20 @@
+{
+    "year": 2024,
+    "users": [
+        {
+            "username": "Ben",
+            "password": "Ben",
+            "role": "Player"
+        },
+        {
+            "username": "Jeremy",
+            "password": "Jeremy",
+            "role": "Player"
+        },
+        {
+            "username": "admin",
+            "password": "adminpass",
+            "role": "Admin"
+        }
+    ]
+}

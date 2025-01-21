@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+{% block title %}Driver Selection - Week {{ current_week }}{% endblock %}
+
+{% block content %}
+<h1>Driver Selection - Week {{ current_week }}</h1>
+
+{% if allow_picks %}
+<!-- Instructions -->
+<p>Select your driver for Week {{ current_week }}. You can only select one driver for this week.</p>
+
+<!-- Driver Selection Form -->
+<form method="POST">
+    <fieldset>
+        <legend>Select Driver:</legend>
+        {% for driver in drivers %}
+            <label>
+                <input type="radio" name="driver" value="{{ driver['code'] }}" required>
+                {{ driver['name'] }}
+            </label>
+            <br>
+        {% endfor %}
+    </fieldset>
+
+    <!-- Submit Button -->
+    <button type="submit">Submit Pick</button>
+</form>
+
+{% else %}
+<!-- Locked Picks -->
+<p><strong>Picks for this week are disabled.</strong></p>
+<p>The race has not yet occurred.</p>
+{% endif %}
+
+<!-- Back to Scores -->
+<p><a href="{{ url_for('view_scores') }}">View Scores</a></p>
+{% endblock %}

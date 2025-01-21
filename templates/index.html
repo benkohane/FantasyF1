@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <h2>Welcome, {{ username }}!</h2>
+  <p>Role: {{ role }}</p>
+  <p><em>Please select drivers for races you have not selected yet - see hyperlinks below.</em></p>
+
+  <h3>Race Schedule</h3>
+<table>
+  <thead>
+    <tr>
+      <th>Round</th>
+      <th>Race</th>
+      <th>Date</th>
+      <th>Driver</th>
+      <th>Points</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for race in races %}
+      <tr {% if race.you_are_here %} style="background-color: yellow;" {% endif %}>
+        <td>
+          {% if race.round %}
+            Round {{ race.round }}
+          {% else %}
+            &nbsp;
+          {% endif %}
+        </td>
+        <td>{{ race.title }}</td>
+        <td>{{ race.date }}</td>
+        <td>
+          {% if race.you_are_here %}
+            &nbsp;
+          {% elif race.can_select_driver %}
+            {% if race.selected_driver %}
+              <a href="{{ url_for('select_driver', race_round=race.round) }}">
+                {{ race.selected_driver }} (Edit)
+              </a>
+            {% else %}
+              <a href="{{ url_for('select_driver', race_round=race.round) }}">Select Driver</a>
+            {% endif %}
+          {% else %}
+            {{ race.selected_driver or '&nbsp;' }}
+          {% endif %}
+        </td>
+        <td>
+          {% if race.points is not none %}
+            {{ race.points }}
+          {% elif race.you_are_here %}
+            &nbsp;
+          {% else %}
+            N/A
+          {% endif %}
+        </td>
+      </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<h3>Current Leaderboard</h3>
+<ul>
+  {% for user, score in scores.items() %}
+    <li>{{ user }}: {{ score }} points</li>
+  {% endfor %}
+</ul>
+
+{% endblock %}

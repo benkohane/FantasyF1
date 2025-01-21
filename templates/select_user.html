@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Select Your User</h1>
+<form method="POST">
+    {% for player in players %}
+        <label>
+            <input type="radio" name="user" value="{{ player }}" required> {{ player }}
+        </label>
+        <br>
+    {% endfor %}
+    <button type="submit">Select</button>
+</form>
+{% endblock %}
