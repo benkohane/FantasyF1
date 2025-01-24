@@ -59,7 +59,7 @@
 
 <h3>Current Leaderboard</h3>
 <ul>
-  {% for user, score in scores.items() %}
+  {% for user, score in sorted_scores %}
     <li>{{ user }}: {{ score }} points</li>
   {% endfor %}
 </ul>
