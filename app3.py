@@ -359,4 +359,6 @@ if __name__ == '__main__':
         print("Starting app without resetting the database...")
 
     # Start the app regardless of the reset flag
-    app.run(debug=True)
+    #app.run(debug=True)
+    #For running on Render require
+    app.run(host='0.0.0.0', port=5000,debug=True)
