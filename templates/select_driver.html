@@ -3,25 +3,70 @@
 {% block title %}Select Driver{% endblock %}
 
 {% block content %}
-<h2>Select Driver for {{ race_title }} (Round {{ race_round }})</h2>
+<div class="text-center mb-8">
+  <h2 class="text-3xl font-semibold text-gray-100">
+    Select Driver for {{ race_title }} (Round {{ race_round }})
+  </h2>
+  <p class="text-gray-400 mt-2">
+    You can only select each driver <strong>twice</strong> per season. Maxed-out drivers are disabled.
+  </p>
+</div>
 
-<form method="POST">
-    <label for="driver">Choose a Driver:</label>
-    <select name="driver" id="driver" required>
-        {% for driver in drivers %}
-            <option value="{{ driver.code }}" {% if driver.selection_count >= 2 %}disabled style="color: gray;" title="You can only select each driver twice per season"{% endif %}>
-                {{ driver.name }} {% if driver.selection_count >= 2 %}(Maxed Out){% endif %}
-            </option>
-        {% endfor %}
-    </select>
-    <br><br>
-    <button type="submit">Submit</button>
+<!-- Driver Selection Form -->
+<form method="POST" class="bg-gray-800 p-6 rounded-lg shadow-lg max-w-lg mx-auto">
+  <label for="driver" class="block text-lg text-gray-300 mb-2">Choose a Driver:</label>
+  <select
+    name="driver"
+    id="driver"
+    required
+    class="w-full bg-gray-700 text-gray-300 border border-gray-600 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+  >
+    {% for driver in drivers %}
+      <option
+        value="{{ driver.code }}"
+        {% if driver.selection_count >= 2 %}disabled class="text-gray-500"{% endif %}
+      >
+        {{ driver.name }} {% if driver.selection_count >= 2 %}(Maxed Out){% endif %}
+      </option>
+    {% endfor %}
+  </select>
+
+  <button
+    type="submit"
+    class="mt-4 w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg font-semibold shadow-md"
+  >
+    Submit
+  </button>
 </form>
 
-<h3>Driver Selection Status</h3>
-<ul>
-    {% for driver in drivers %}
-        <li>{{ driver.name }}: {{ driver.selection_count }} selections</li>
-    {% endfor %}
-</ul>
+<!-- Driver Selection Status -->
+<div class="mt-8">
+  <h3 class="text-2xl font-semibold text-gray-100 mb-4">Driver Selection Status</h3>
+  <div class="overflow-x-auto bg-gray-800 rounded-lg shadow-lg">
+    <table class="min-w-full table-auto text-sm text-gray-300">
+      <thead class="bg-gray-700">
+        <tr>
+          <th class="px-4 py-2">Driver</th>
+          <th class="px-4 py-2">Selections</th>
+          <th class="px-4 py-2">Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for driver in drivers %}
+          <tr class="hover:bg-gray-700">
+            <td class="px-4 py-2">{{ driver.name }}</td>
+            <td class="px-4 py-2 text-center">{{ driver.selection_count }}</td>
+            <td class="px-4 py-2 text-center">
+              {% if driver.selection_count >= 2 %}
+                <span class="text-red-500 font-semibold">Maxed Out</span>
+              {% else %}
+                <span class="text-green-500 font-semibold">Available</span>
+              {% endif %}
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
 {% endblock %}

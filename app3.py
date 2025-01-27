@@ -324,7 +324,10 @@ def scores_view():
 
     # Fetch selections from Supabase
     selections = supabase.table("selections").select("username, race_round, selected_driver, points").execute().data
-    
+
+    # Sort selections by race round numerically
+    selections.sort(key=lambda x: x['race_round'])
+
     user_data = {}
     for selection in selections:
         username, race_round, selected_driver, points = selection["username"], selection["race_round"], selection["selected_driver"], selection["points"]
@@ -340,8 +343,14 @@ def scores_view():
         })
         if points is not None:
             user_data[username]["total_points"] += points
+    # Fetch race schedule (you could adjust this to your actual race fetching method)
+    races = fetch_race_schedule()  # Adjust to your fetching logic
 
-    return render_template("scores.html", user_data=user_data)
+    return render_template("scores.html", user_data=user_data, races=races)
+
+
+
+
 
 
 if __name__ == '__main__':

@@ -3,14 +3,19 @@
 {% block title %}Login{% endblock %}
 
 {% block content %}
-<h1>Login</h1>
-<form method="POST">
-    <label for="username">Username:</label>
-    <input type="text" id="username" name="username" required><br><br>
-
-    <label for="password">Password:</label>
-    <input type="password" id="password" name="password" required><br><br>
-
-    <button type="submit">Login</button>
+<h1>Login Page</h1>
+<form method="POST" class="space-y-4">
+    <div>
+        <label for="username" class="block text-lg">Username:</label>
+        <input type="text" id="username" name="username" class="w-full p-2 rounded-md bg-gray-700 border border-gray-600" required>
+    </div>
+    <div>
+        <label for="password" class="block text-lg">Password:</label>
+        <input type="password" id="password" name="password" class="w-full p-2 rounded-md bg-gray-700 border border-gray-600" required>
+    </div>
+    <button type="submit" class="bg-red-500 text-white rounded px-4 py-2 hover:bg-red-600 transition">Login</button>
 </form>
+
 {% endblock %}
+
+

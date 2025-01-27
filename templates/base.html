@@ -3,21 +3,28 @@
 <head>
     <meta charset="UTF-8">
     <title>{% block title %}Fantasy F1{% endblock %}</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <!-- Use the latest Tailwind CSS CDN (Official CDN) -->
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
-    <header>
-        <h1>Fantasy F1 App</h1>
-        <nav>
-            <a href="{{ url_for('home') }}">Home</a> |
-            <a href="{{ url_for('scores_view') }}">Full Data</a> |
-            <a href="{{ url_for('logout') }}">Logout</a>
-        </nav>
-        
-        <hr>
+<body class="bg-gray-900 text-gray-100">
+    <header class="bg-gray-800 text-gray-100">
+        <div class="container mx-auto flex justify-between items-center p-4">
+            <h1 class="text-2xl font-bold">Fantasy F1 App</h1>
+            <nav class="space-x-4">
+                <a href="{{ url_for('home') }}" class="hover:text-red-500">Home</a>
+                <a href="{{ url_for('scores_view') }}" class="hover:text-red-500">Full Data</a>
+                <a href="{{ url_for('logout') }}" class="hover:text-red-500">Logout</a>
+            </nav>
+        </div>
+        <div class="bg-red-500 h-1 w-full"></div>
     </header>
-    <main>
-        {% block content %}{% endblock %}
+    <main class="container mx-auto mt-6 p-4">
+        <div class="bg-gray-800 p-6 rounded-lg shadow-md">
+            {% block content %}{% endblock %}
+        </div>
     </main>
+    <footer class="bg-gray-800 text-center py-4 mt-6 text-sm">
+        &copy; Silver Linings Fantasy F1. All Rights Reserved.
+    </footer>
 </body>
 </html>

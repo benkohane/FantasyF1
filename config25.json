@@ -1,0 +1,35 @@
+{
+    "year": 2025,
+    "users": [
+        {
+            "username": "Ben",
+            "password": "Ben",
+            "role": "Player"
+        },
+        {
+            "username": "Jeremy",
+            "password": "Jeremy",
+            "role": "Player"
+        },
+        {
+            "username": "Ely",
+            "password": "Ely",
+            "role": "Player"
+        },
+        {
+            "username": "Ariel",
+            "password": "Ariel",
+            "role": "Player"
+        },
+        {
+            "username": "Dani",
+            "password": "Dani",
+            "role": "Player"
+        },
+        {
+            "username": "admin",
+            "password": "adminpass",
+            "role": "Admin"
+        }
+    ]
+}
