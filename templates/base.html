@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <title>{% block title %}Fantasy F1{% endblock %}</title>
-    <!-- Use the latest Tailwind CSS CDN (Official CDN) -->
-    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Link to the locally compiled Tailwind CSS file -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/output.css') }}">
 </head>
 <body class="bg-gray-900 text-gray-100">
     <header class="bg-gray-800 text-gray-100">
