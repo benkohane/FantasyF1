@@ -5,67 +5,147 @@
 {% block content %}
 <div class="text-center mb-8">
   <h2 class="text-3xl font-semibold text-gray-100">Player Overview & Scores</h2>
-  <p class="text-gray-400 mt-2">This page shows a detailed breakdown of each player's selections and their total points across all races.</p>
+  <p class="text-gray-400 mt-2">This page shows detailed breakdowns of each player's selections and their total points across the season.</p>
 </div>
 
-<!-- Filters -->
-<div class="flex justify-center mb-8">
-  <select id="filter-username" class="bg-gray-800 text-gray-300 border border-gray-600 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500 mx-2">
-    <option value="">Filter by Player</option>
-    {% for username in user_data.keys() %}
-      <option value="{{ username }}">{{ username }}</option>
-    {% endfor %}
-  </select>
+<!-- Tabs for switching views -->
+<div class="flex justify-center mb-6 space-x-4">
+  <button id="toggle-table" class="tab-btn bg-blue-600 text-white font-semibold px-6 py-3 rounded-lg hover:bg-blue-700 focus:ring-2 focus:ring-blue-400 transition duration-300 ease-in-out">Table View</button>
+  <button id="toggle-chart" class="tab-btn bg-gray-700 text-white font-semibold px-6 py-3 rounded-lg hover:bg-gray-800 focus:ring-2 focus:ring-blue-400 transition duration-300 ease-in-out">Graph View</button>
 </div>
 
-<!-- Score Table -->
-<div class="overflow-x-auto bg-gray-800 rounded-lg shadow-lg">
-  <table class="min-w-full table-auto text-sm text-gray-300">
-    <thead class="bg-gray-700">
-      <tr>
-        <th class="px-4 py-2 text-left">Username</th>
-        <th class="px-4 py-2 text-left">Race Round</th>
-        <th class="px-4 py-2 text-left">Selected Driver</th>
-        <th class="px-4 py-2 text-left">Points</th>
-        <th class="px-4 py-2 text-left">Total Points</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for username, data in user_data.items() %}
-        {% for selection in data.selections %}
-          <tr class="hover:bg-gray-700" data-username="{{ username }}">
-            {% if loop.first %}
-              <td rowspan="{{ data.selections|length }}" class="font-semibold">{{ username }}</td>
-            {% endif %}
-            <td>{{ selection.race_round }}</td>
-            <td>{{ selection.selected_driver }}</td>
-            <td>{{ selection.points if selection.points is not none else 'N/A' }}</td>
-            {% if loop.first %}
-              <td rowspan="{{ data.selections|length }}" class="font-semibold">{{ data.total_points }}</td>
-            {% endif %}
-          </tr>
-        {% endfor %}
+<!-- Table Container -->
+<div id="table-container" class="block">
+  <div class="flex justify-center mb-8">
+    <select id="filter-username" class="bg-gray-800 text-gray-300 border border-gray-600 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-blue-500 mx-2">
+      <option value="">Filter by Player</option>
+      {% for username in user_data.keys() %}
+        <option value="{{ username }}">{{ username }}</option>
       {% endfor %}
-    </tbody>
-  </table>
+    </select>
+  </div>
+
+  <!-- Score Table -->
+  <div class="overflow-x-auto bg-gray-800 rounded-lg shadow-lg">
+    <table class="min-w-full table-auto text-sm text-gray-300">
+      <thead class="bg-gray-700">
+        <tr>
+          <th class="px-4 py-2 text-left">Username</th>
+          <th class="px-4 py-2 text-left">Race Round</th>
+          <th class="px-4 py-2 text-left">Selected Driver</th>
+          <th class="px-4 py-2 text-left">Points</th>
+          <th class="px-4 py-2 text-left">Total Points</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for username, data in user_data.items() %}
+          {% for selection in data.selections %}
+            <tr class="hover:bg-gray-700" data-username="{{ username }}">
+              {% if loop.first %}
+                <td rowspan="{{ data.selections|length }}" class="font-semibold">{{ username }}</td>
+              {% endif %}
+              <td>{{ selection.race_round }}</td>
+              <td>{{ selection.selected_driver }}</td>
+              <td>{{ selection.points if selection.points is not none else 'N/A' }}</td>
+              {% if loop.first %}
+                <td rowspan="{{ data.selections|length }}" class="font-semibold">{{ data.total_points }}</td>
+              {% endif %}
+            </tr>
+          {% endfor %}
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
 </div>
+
+<!-- Chart Container -->
+<div id="chart-container" class="hidden">
+  <h3 class="text-2xl font-semibold mt-8 mb-4 text-gray-100">Points Over Time</h3>
+  <canvas 
+    id="lineChart" 
+    class="w-full bg-gray-800 rounded-lg p-4"
+    aria-label="Line chart showing user points over time"
+    role="img">
+  </canvas>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  async function fetchChartData() {
+    try {
+      const response = await fetch('/chart_data');
+      if (!response.ok) {
+        throw new Error(`Failed to fetch chart data: ${response.statusText}`);
+      }
+      const data = await response.json();
+      const datasets = [];
+      let userIndex = 0;
+      const generateColor = (index) => `hsl(${(index * 137.5) % 360}, 70%, 50%)`;
+
+      for (const [username, details] of Object.entries(data)) {
+        datasets.push({
+          label: username,
+          data: details.race_rounds.map((round, i) => ({ x: round, y: details.points[i] })),
+          borderColor: generateColor(userIndex),
+          borderWidth: 2,
+          tension: 0.3,
+          fill: false,
+        });
+        userIndex++;
+      }
+
+      const ctx = document.getElementById('lineChart').getContext('2d');
+      new Chart(ctx, {
+        type: 'line',
+        data: { datasets },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: { position: 'top', labels: { color: '#ffffff' } },
+            title: { display: true, text: 'User Points Over Time', color: '#ffffff', font: { size: 16 } },
+          },
+          scales: {
+            x: {
+              title: { display: true, text: 'Race Round', color: '#ffffff' },
+              type: 'linear',
+              ticks: { color: '#ffffff' },
+              grid: { color: 'rgba(255, 255, 255, 0.2)' },
+            },
+            y: {
+              title: { display: true, text: 'Points', color: '#ffffff' },
+              ticks: { color: '#ffffff' },
+              grid: { color: 'rgba(255, 255, 255, 0.2)' },
+            },
+          },
+        },
+      });
+    } catch (error) {
+      console.error('Error rendering the chart:', error);
+    }
+  }
+  fetchChartData();
+</script>
 
 <script>
-  document.addEventListener('DOMContentLoaded', function () {
+    document.addEventListener('DOMContentLoaded', function () {
     const filterUsername = document.getElementById('filter-username');
     const rows = document.querySelectorAll('tbody tr');
+    const chartContainer = document.getElementById('chart-container');
+    const tableContainer = document.getElementById('table-container');
+    const toggleChartBtn = document.getElementById('toggle-chart');
+    const toggleTableBtn = document.getElementById('toggle-table');
 
-    // Add event listener for username filter
+    // Make sure we have the default view set correctly when the page loads
+    tableContainer.style.display = 'block'; // Table should be shown by default
+    chartContainer.style.display = 'none'; // Chart should be hidden by default
+
+    // Event listener for the username filter
     filterUsername.addEventListener('change', filterRows);
 
-    // Function to filter rows based on username
     function filterRows() {
       const usernameFilter = filterUsername.value;
-
       rows.forEach(row => {
         const usernameCell = row.dataset.username;
-
-        // If username matches the filter, show the row, otherwise hide it
         if (usernameFilter && usernameCell !== usernameFilter) {
           row.style.display = 'none';
         } else {
@@ -73,7 +153,26 @@
         }
       });
     }
+
+    // Toggle table view when clicked
+    toggleTableBtn.addEventListener('click', function () {
+      console.log('Table view clicked');
+      tableContainer.style.display = 'block';  // Show table
+      chartContainer.style.display = 'none';  // Hide chart
+      toggleTableBtn.classList.add('bg-blue-600', 'hover:bg-blue-700');
+      toggleChartBtn.classList.remove('bg-blue-600', 'hover:bg-blue-700');
+    });
+
+    // Toggle chart view when clicked
+    toggleChartBtn.addEventListener('click', function () {
+      console.log('Chart view clicked');
+      chartContainer.style.display = 'block';  // Show chart
+      tableContainer.style.display = 'none';  // Hide table
+      toggleChartBtn.classList.add('bg-blue-600', 'hover:bg-blue-700');
+      toggleTableBtn.classList.remove('bg-blue-600', 'hover:bg-blue-700');
+    });
   });
-</script>
+  </script>
+  
 
 {% endblock %}

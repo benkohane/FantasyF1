@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, session
+from flask import Flask, render_template, request, redirect, url_for, session, jsonify
 from datetime import datetime
 import requests
 import json
@@ -226,7 +226,10 @@ def home():
 
     
     print_database_contents()
-
+# In your home function, for each race, format the date:
+    for race in races:
+        race_date = datetime.strptime(race["date"], "%Y-%m-%d").date()  # Parse the date
+        race["formatted_date"] = race_date.strftime("%m/%d/%Y")  # Format the date to MM/DD/YYYY
     return render_template(
         "index.html",
         username=username,
@@ -347,6 +350,38 @@ def scores_view():
     races = fetch_race_schedule()  # Adjust to your fetching logic
 
     return render_template("scores.html", user_data=user_data, races=races)
+
+
+@app.route('/chart_data')
+def chart_data():
+    if "username" not in session:
+        return jsonify({"error": "Unauthorized"}), 401
+
+    # Fetch data from Supabase
+    selections = supabase.table("selections").select("username, race_round, points").execute().data
+
+    # Process data into a dictionary
+    user_scores = {}
+    for row in selections:
+        username, race_round, points = row["username"], row["race_round"], row["points"]
+        if username not in user_scores:
+            user_scores[username] = []
+
+        user_scores[username].append({"race_round": race_round, "points": points or 0})  # Use 0 if points are None
+
+    # Sort each user's data by race_round and calculate cumulative points
+    for username, data in user_scores.items():
+        sorted_data = sorted(data, key=lambda x: x["race_round"])
+        cumulative_points = 0
+        race_rounds = []
+        points = []
+        for entry in sorted_data:
+            cumulative_points += entry["points"]
+            race_rounds.append(entry["race_round"])
+            points.append(cumulative_points)
+        user_scores[username] = {"race_rounds": race_rounds, "points": points}
+
+    return jsonify(user_scores)
 
 
 
