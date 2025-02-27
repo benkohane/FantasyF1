@@ -167,7 +167,7 @@ def home():
             "date": today.strftime("%Y-%m-%d"),
             "you_are_here": True,
         })
-
+    
     # Check race selection status and points
     for race in races:
         if race.get("you_are_here"):  # Skip processing for "YOU ARE HERE"
@@ -175,7 +175,7 @@ def home():
             race["selected_driver"] = None
             race["points"] = None
             continue
-
+    
 
         # Check if the user has already selected a driver for this race
         # Fetch selections data from Supabase instead of SQLite**
@@ -196,7 +196,7 @@ def home():
         
         race["can_select_driver"] = race_date > today or selection is None or selection[0]["selected_driver"] is None  # Can select if race is in the future or no driver has been selected
         race["selected_driver"] = selection[0]["selected_driver"] if selection else None
-
+    
     # Calculate scores from Supabase
     #scores_from_db = supabase.table("selections").select("username, SUM(points)").group_by("username").execute().data
     #scores_from_db = supabase.rpc("get_user_scores").execute().data #replaced since Supabase doesn't use groupby?
@@ -225,8 +225,13 @@ def home():
     sorted_scores = sorted(scores.items(), key=lambda x: x[1], reverse=True)
 
     
-    print_database_contents()
-
+    # If you want to see the entire database as it currently stands, run this
+    # print_database_contents()
+    
+# In your home function, for each race, format the date:
+    for race in races:
+        race_date = datetime.strptime(race["date"], "%Y-%m-%d").date()  # Parse the date
+        race["formatted_date"] = race_date.strftime("%m/%d/%Y")  # Format the date to MM/DD/YYYY
     return render_template(
         "index.html",
         username=username,

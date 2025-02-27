@@ -40,7 +40,7 @@
     <tbody>
       {% for race in races %}
       <tr class="hover:bg-gray-700 {{ 'bg-yellow-500' if race.you_are_here else '' }}" 
-      style="color: {{ 'black' if race.you_are_here else 'inherit' }};">
+      style="color: {{ 'green' if race.you_are_here else 'inherit' }};">
          <td class="px-4 py-2 text-center">
           {% if race.round %}
           Round {{ race.round }}
