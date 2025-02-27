@@ -175,7 +175,8 @@ def home():
             race["selected_driver"] = None
             race["points"] = None
             continue
-    
+
+        race_date = datetime.strptime(race["date"], "%Y-%m-%d").date()    
 
         # Check if the user has already selected a driver for this race
         # Fetch selections data from Supabase instead of SQLite**
@@ -183,7 +184,6 @@ def home():
 
         # If a driver is selected and the race date is in the past, fetch the results and update points
         if selection and selection[0]["selected_driver"]:  # There is a driver selected
-            race_date = datetime.strptime(race["date"], "%Y-%m-%d").date()
             if race_date < today and selection[0]["points"] is None:
                 selected_driver = selection[0]["selected_driver"]
                 fetch_and_store_results(race["round"], selected_driver)
@@ -194,7 +194,8 @@ def home():
 
         #conn.close()
         
-        race["can_select_driver"] = race_date > today or selection is None or selection[0]["selected_driver"] is None  # Can select if race is in the future or no driver has been selected
+        race["can_select_driver"] = race_date > today #removed the other condition to not allow picking drivers post racers #and (selection is None or selection[0]["selected_driver"] is None)  # Can select if race is in the future or no driver has been selected
+        #print(race_date, race["can_select_driver"])
         race["selected_driver"] = selection[0]["selected_driver"] if selection else None
     
     # Calculate scores from Supabase
