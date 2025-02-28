@@ -277,6 +277,11 @@ def select_driver():
 
         selection_count = selection[0]["selection_count"] if selection else 0
 
+        race_round = request.args.get('race_round')
+
+        if selection_count >=1 and int(race_round) <= 20:
+            return "You can't select a driver twice before all drivers are selected."
+
         if selection_count >= 2:
             return "You can only select each driver twice per season."
 
