@@ -272,7 +272,7 @@ def select_driver():
     if request.method == 'POST':
         selected_driver = request.form['driver']
 
-        # Check if the driver has already been selected twice
+        # Checks on whether driver has already been selected
         selection = supabase.table("driver_selections").select("selection_count").eq("username", username).eq("driver_code", selected_driver).execute().data
 
         selection_count = selection[0]["selection_count"] if selection else 0
