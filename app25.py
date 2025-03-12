@@ -272,46 +272,50 @@ def select_driver():
     if request.method == 'POST':
         selected_driver = request.form['driver']
 
-        # Checks on whether driver has already been selected
+ # Check if the driver has already been selected before
         selection = supabase.table("driver_selections").select("selection_count").eq("username", username).eq("driver_code", selected_driver).execute().data
-
         selection_count = selection[0]["selection_count"] if selection else 0
 
-        race_round = request.args.get('race_round')
-
-        if selection_count >=1 and int(race_round) <= 20:
+        if selection_count >= 1 and int(race_round) <= 20:
             return "You can't select a driver twice before all drivers are selected."
 
         if selection_count >= 2:
             return "You can only select each driver twice per season."
 
-        # Check if the selection for the given race round already exists
-        existing_selection = supabase.table("selections").select("id").eq("username", username).eq("race_round", int(race_round)).execute().data
+        # Check if the user already has a driver selected for this race
+        existing_selection = supabase.table("selections").select("selected_driver").eq("username", username).eq("race_round", int(race_round)).execute().data
+        previous_driver = existing_selection[0]["selected_driver"] if existing_selection else None
 
-        if existing_selection:  # If the selection exists, update the existing row
+        # Remove the previous selection from driver_selections if it exists
+        if previous_driver and previous_driver != selected_driver:
+            prev_selection = supabase.table("driver_selections").select("selection_count").eq("username", username).eq("driver_code", previous_driver).execute().data
+            if prev_selection:
+                prev_count = prev_selection[0]["selection_count"]
+                if prev_count > 1:
+                    supabase.table("driver_selections").update({"selection_count": prev_count - 1}).eq("username", username).eq("driver_code", previous_driver).execute()
+                else:
+                    supabase.table("driver_selections").delete().eq("username", username).eq("driver_code", previous_driver).execute()
+
+        # Insert or update the new selection in selections table
+        if existing_selection:  # Update existing selection
             supabase.table("selections").update({
                 "selected_driver": selected_driver,
-                "points": None  # Set points to None or update with actual points if available
+                "points": None  # Reset points
             }).eq("username", username).eq("race_round", int(race_round)).execute()
-        else:  # Otherwise, insert a new row
+        else:  # Insert new selection
             supabase.table("selections").insert({
                 "username": username,
                 "race_round": int(race_round),
                 "selected_driver": selected_driver,
-                "points": None  # Set points to None or update with actual points if available
+                "points": None
             }).execute()
 
-        # Update the driver_selections table
-        if selection:
-            # Fetch the current selection_count from the existing selection
-            current_count = selection[0]["selection_count"] if selection else 0
-
-            # Increment selection_count and update the table
-            supabase.table("driver_selections").update({
-                "selection_count": current_count + 1
-            }).eq("username", username).eq("driver_code", selected_driver).execute()
+        # Update or insert the new driver into driver_selections
+        new_selection = supabase.table("driver_selections").select("selection_count").eq("username", username).eq("driver_code", selected_driver).execute().data
+        if new_selection:
+            new_count = new_selection[0]["selection_count"]
+            supabase.table("driver_selections").update({"selection_count": new_count + 1}).eq("username", username).eq("driver_code", selected_driver).execute()
         else:
-            # Insert a new record if no selection exists
             supabase.table("driver_selections").insert({
                 "username": username,
                 "driver_code": selected_driver,
