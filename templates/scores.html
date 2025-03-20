@@ -40,16 +40,12 @@
       <tbody>
         {% for username, data in user_data.items() %}
           {% for selection in data.selections %}
-            <tr class="hover:bg-gray-700" data-username="{{ username }}">
-              {% if loop.first %}
-                <td rowspan="{{ data.selections|length }}" class="font-semibold">{{ username }}</td>
-              {% endif %}
+            <tr class="hover:bg-gray-700" data-username="{{ username }}" data-race-round="{{ selection.race_round }}">
+              <td class="font-semibold">{{ username }}</td> <!-- No rowspan, just repeat -->
               <td>{{ selection.race_round }}</td>
               <td>{{ selection.selected_driver }}</td>
               <td>{{ selection.points if selection.points is not none else 'N/A' }}</td>
-              {% if loop.first %}
-                <td rowspan="{{ data.selections|length }}" class="font-semibold">{{ data.total_points }}</td>
-              {% endif %}
+              <td class="font-semibold">{{ data.total_points }}</td> <!-- Repeated instead of rowspan -->
             </tr>
           {% endfor %}
         {% endfor %}
@@ -127,52 +123,47 @@
 </script>
 
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
+  document.addEventListener('DOMContentLoaded', function () {
     const filterUsername = document.getElementById('filter-username');
-    const rows = document.querySelectorAll('tbody tr');
-    const chartContainer = document.getElementById('chart-container');
-    const tableContainer = document.getElementById('table-container');
-    const toggleChartBtn = document.getElementById('toggle-chart');
-    const toggleTableBtn = document.getElementById('toggle-table');
+    const filterRound = document.createElement('select'); // Create new dropdown for rounds
+    filterRound.id = 'filter-round';
+    filterRound.className = 'bg-gray-800 text-gray-300 border border-gray-600 rounded-lg p-3 mx-2 focus:outline-none focus:ring-2 focus:ring-blue-500';
 
-    // Make sure we have the default view set correctly when the page loads
-    tableContainer.style.display = 'block'; // Table should be shown by default
-    chartContainer.style.display = 'none'; // Chart should be hidden by default
+    // Add Round filter options dynamically
+    filterRound.innerHTML = `<option value="">Filter by Round</option>`;
+    const uniqueRounds = new Set();
+    document.querySelectorAll('tbody tr').forEach(row => {
+      uniqueRounds.add(row.dataset.raceRound);
+    });
+    uniqueRounds.forEach(round => {
+      filterRound.innerHTML += `<option value="${round}">Round ${round}</option>`;
+    });
 
-    // Event listener for the username filter
+    // Add the round filter next to the player filter
+    filterUsername.parentNode.appendChild(filterRound);
+
+    // Event listeners for filtering
     filterUsername.addEventListener('change', filterRows);
+    filterRound.addEventListener('change', filterRows);
 
     function filterRows() {
       const usernameFilter = filterUsername.value;
-      rows.forEach(row => {
+      const roundFilter = filterRound.value;
+
+      document.querySelectorAll('tbody tr').forEach(row => {
         const usernameCell = row.dataset.username;
-        if (usernameFilter && usernameCell !== usernameFilter) {
-          row.style.display = 'none';
-        } else {
-          row.style.display = '';
-        }
+        const roundCell = row.dataset.raceRound;
+
+        // Apply filtering logic
+        const showRow =
+          (!usernameFilter || usernameCell === usernameFilter) &&
+          (!roundFilter || roundCell === roundFilter);
+
+        row.style.display = showRow ? '' : 'none';
       });
     }
-
-    // Toggle table view when clicked
-    toggleTableBtn.addEventListener('click', function () {
-      console.log('Table view clicked');
-      tableContainer.style.display = 'block';  // Show table
-      chartContainer.style.display = 'none';  // Hide chart
-      toggleTableBtn.classList.add('bg-blue-600', 'hover:bg-blue-700');
-      toggleChartBtn.classList.remove('bg-blue-600', 'hover:bg-blue-700');
-    });
-
-    // Toggle chart view when clicked
-    toggleChartBtn.addEventListener('click', function () {
-      console.log('Chart view clicked');
-      chartContainer.style.display = 'block';  // Show chart
-      tableContainer.style.display = 'none';  // Hide table
-      toggleChartBtn.classList.add('bg-blue-600', 'hover:bg-blue-700');
-      toggleTableBtn.classList.remove('bg-blue-600', 'hover:bg-blue-700');
-    });
   });
-  </script>
+</script>
   
 
 {% endblock %}
