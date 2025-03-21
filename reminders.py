@@ -29,7 +29,7 @@ EMAIL_PASSWORD = os.getenv("EMAIL_PASSWORD")  # Change to your email password
 # Fixed recipient
 RECIPIENT_EMAIL = os.getenv("EMAIL_RECIPIENT_ADDRESS")
 PHONE_NUMBER = os.getenv("PHONE")  # Replace with the phone number for WhatsApp
-WHATSAPP_GROUP_ID = "DsL6YuZeu9wHtiLGY6WTBN"  # Replace with your WhatsApp group name
+WHATSAPP_GROUP_ID = os.getenv("GROUP ")  # Replace with your WhatsApp group name
 
 # Constants
 YEAR = 2025  # or set dynamically based on the current year

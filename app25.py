@@ -127,7 +127,6 @@ def fetch_and_store_results(race_round, selected_driver):
         print(f"Error fetching and storing race results for round {race_round}: {e}")
 
 
-
 @app.route('/')
 def home():
     if "username" not in session:
@@ -146,7 +145,7 @@ def home():
     current_round = None
     for race in races:
         race_date = datetime.strptime(race["date"], "%Y-%m-%d").date()
-        if race_date >= today:
+        if race_date >= today:  # Identify the current or next race
             current_round = race["round"]
             break
 
@@ -170,57 +169,72 @@ def home():
             "date": today.strftime("%Y-%m-%d"),
             "you_are_here": True,
         })
-
-    # Fetch selections for the user in a single query
-    selections = supabase.table("selections").select("race_round", "selected_driver", "points").eq("username", username).execute().data
-    selections_dict = {sel["race_round"]: sel for sel in selections}
-
-    # Process each race
+    
+    # Check race selection status and points
     for race in races:
-        race_date = datetime.strptime(race["date"], "%Y-%m-%d").date()
-        race["can_select_driver"] = race_date > today  # Can select if race is in the future
-
         if race.get("you_are_here"):  # Skip processing for "YOU ARE HERE"
+            race["can_select_driver"] = False
             race["selected_driver"] = None
             race["points"] = None
             continue
 
-        selection = selections_dict.get(race["round"])
-        
-        if selection and selection["selected_driver"]:  # If a driver is selected
-            race["selected_driver"] = selection["selected_driver"]
+        race_date = datetime.strptime(race["date"], "%Y-%m-%d").date()    
 
-            if race_date < today and selection["points"] is None:  # If race has passed and no points assigned
-                fetch_and_store_results(race["round"], selection["selected_driver"])
+        # Check if the user has already selected a driver for this race
+        # Fetch selections data from Supabase instead of SQLite**
+        selection = supabase.table("selections").select("selected_driver, points").eq("username", username).eq("race_round", race["round"]).execute().data
+
+        # If a driver is selected and the race date is in the past, fetch the results and update points
+        if selection and selection[0]["selected_driver"]:  # There is a driver selected
+            if race_date < today and selection[0]["points"] is None:
+                selected_driver = selection[0]["selected_driver"]
+                fetch_and_store_results(race["round"], selected_driver)
                 updated_selection = supabase.table("selections").select("points").eq("username", username).eq("race_round", race["round"]).execute().data
                 race["points"] = updated_selection[0]["points"] if updated_selection else None
             else:
-                race["points"] = selection["points"]  # Show points if already updated
+                race["points"] = selection[0]["points"] # Show the points if already updated
 
-        else:
-            race["selected_driver"] = None
-            race["points"] = None
-
-    # Get scores from Supabase
+        #conn.close()
+        
+        race["can_select_driver"] = race_date > today #removed the other condition to not allow picking drivers post racers #and (selection is None or selection[0]["selected_driver"] is None)  # Can select if race is in the future or no driver has been selected
+        #print(race_date, race["can_select_driver"])
+        race["selected_driver"] = selection[0]["selected_driver"] if selection else None
+    
+    # Calculate scores from Supabase
+    #scores_from_db = supabase.table("selections").select("username, SUM(points)").group_by("username").execute().data
+    #scores_from_db = supabase.rpc("get_user_scores").execute().data #replaced since Supabase doesn't use groupby?
+    #disabling above bc rbc requires RLS and I don't get how to do this
+    # Get data from Supabase
     data = supabase.table("selections").select("username", "points").execute().data
+
+    # Aggregate scores in Python
+    from collections import defaultdict
+
     scores = defaultdict(int)
     for row in data:
-        if row["points"] is not None:
+        if row["points"] is not None:  # Ensure there's no None value for points
             scores[row["username"]] += row["points"]
 
+    # Transform scores into a list of dictionaries
     scores_from_db = [{"username": user, "total_points": points} for user, points in scores.items()]
+
+    # Create a dictionary from the scores_from_db
     scores_dict = {row["username"]: row["total_points"] for row in scores_from_db}
+
+    # Ensure scores have a value for all players
     all_users = USERS_DB.keys()  # Get all usernames from USERS_DB
     scores = {user: scores_dict.get(user, 0) for user in all_users}
-
     # Sort the dictionary by points in descending order
     sorted_scores = sorted(scores.items(), key=lambda x: x[1], reverse=True)
 
-    # Format the date for each race
+    
+    # If you want to see the entire database as it currently stands, run this
+    # print_database_contents()
+    
+# In your home function, for each race, format the date:
     for race in races:
-        race_date = datetime.strptime(race["date"], "%Y-%m-%d").date()
-        race["formatted_date"] = race_date.strftime("%m/%d/%Y")
-
+        race_date = datetime.strptime(race["date"], "%Y-%m-%d").date()  # Parse the date
+        race["formatted_date"] = race_date.strftime("%m/%d/%Y")  # Format the date to MM/DD/YYYY
     return render_template(
         "index.html",
         username=username,
